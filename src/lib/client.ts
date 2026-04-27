@@ -1,0 +1,60 @@
+import { LedgerMem } from "@ledgermem/memory";
+import {
+  readConfig,
+  resolveApiKey,
+  resolveApiUrl,
+  resolveWorkspaceId,
+} from "./config.js";
+
+export interface ClientContext {
+  client: LedgerMem;
+  apiKey: string;
+  workspaceId: string;
+  apiUrl: string;
+}
+
+export class ClientAuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ClientAuthError";
+  }
+}
+
+export async function getClient(): Promise<ClientContext> {
+  const cfg = await readConfig();
+  const apiKey = resolveApiKey(cfg);
+  const workspaceId = resolveWorkspaceId(cfg);
+  const apiUrl = resolveApiUrl(cfg);
+
+  if (!apiKey) {
+    throw new ClientAuthError(
+      "Not authenticated. Run `ledgermem login` or set LEDGERMEM_API_KEY.",
+    );
+  }
+  if (!workspaceId) {
+    throw new ClientAuthError(
+      "No workspace selected. Run `ledgermem login` or set LEDGERMEM_WORKSPACE_ID.",
+    );
+  }
+
+  const client = new LedgerMem({ apiKey, workspaceId, apiUrl });
+  return { client, apiKey, workspaceId, apiUrl };
+}
+
+export function parseMetadata(pairs: string[] | undefined): Record<string, string> {
+  if (!pairs || pairs.length === 0) return {};
+  const out: Record<string, string> = {};
+  for (const pair of pairs) {
+    const idx = pair.indexOf("=");
+    if (idx === -1) {
+      throw new Error(`Invalid --metadata value "${pair}". Expected key=value.`);
+    }
+    const key = pair.slice(0, idx).trim();
+    const value = pair.slice(idx + 1).trim();
+    if (!key) {
+      throw new Error(`Invalid --metadata key in "${pair}".`);
+    }
+    out[key] = value;
+  }
+  return out;
+}

@@ -1,0 +1,56 @@
+{
+  "name": "@ledgermem/cli",
+  "version": "0.1.0",
+  "description": "Official CLI for LedgerMem — manage memories, workspaces, and integrations from your terminal.",
+  "type": "module",
+  "bin": {
+    "ledgermem": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@ledgermem/memory": "^0.1.0",
+    "commander": "^12.1.0",
+    "kleur": "^4.1.5",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/prompts": "^2.4.9",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "ledgermem",
+    "memory",
+    "cli",
+    "ai",
+    "agents",
+    "rag"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ledgermem/ledgermem-cli.git"
+  },
+  "homepage": "https://github.com/ledgermem/ledgermem-cli#readme",
+  "bugs": {
+    "url": "https://github.com/ledgermem/ledgermem-cli/issues"
+  }
+}
