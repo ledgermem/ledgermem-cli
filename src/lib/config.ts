@@ -35,10 +35,15 @@ export async function readConfig(): Promise<CliConfig> {
   }
 }
 
-export async function writeConfig(next: CliConfig): Promise<void> {
+export async function writeConfig(patch: Partial<CliConfig>): Promise<void> {
   const path = configPath();
   await fs.mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  const merged: CliConfig = { ...next, updatedAt: new Date().toISOString() };
+  const current = await readConfig();
+  const merged: CliConfig = {
+    ...current,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
   await fs.writeFile(path, JSON.stringify(merged, null, 2) + "\n", { mode: 0o600 });
 }
 

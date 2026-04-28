@@ -27,15 +27,23 @@ export function registerDoctorCommand(program: Command): void {
 
       let healthOk = false;
       let healthDetail = "";
+      let healthUrl: URL | null = null;
       try {
-        const res = await fetch(new URL("/healthz", apiUrl), {
-          method: "GET",
-          headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
-        });
-        healthOk = res.ok;
-        healthDetail = `HTTP ${res.status}`;
-      } catch (err) {
-        healthDetail = err instanceof Error ? err.message : String(err);
+        healthUrl = new URL("/healthz", apiUrl);
+      } catch {
+        healthDetail = `Invalid API URL: "${apiUrl}". Did you forget the scheme (e.g. https://)?`;
+      }
+      if (healthUrl) {
+        try {
+          const res = await fetch(healthUrl, {
+            method: "GET",
+            headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
+          });
+          healthOk = res.ok;
+          healthDetail = `HTTP ${res.status}`;
+        } catch (err) {
+          healthDetail = err instanceof Error ? err.message : String(err);
+        }
       }
       checks.push({ name: `API reachable (${apiUrl}/healthz)`, ok: healthOk, detail: healthDetail });
 

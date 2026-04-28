@@ -80,17 +80,19 @@ export function registerMemoryCommands(program: Command): void {
     .action(async (id: string, _opts: unknown, cmd: Command) => {
       const json = rootJsonFlag(cmd);
       const ctx = await getClient();
-      const list = await ctx.client.list({ limit: 100 });
-      const items = Array.isArray(list) ? list : ((list as { results?: unknown[] })?.results ?? []);
-      const found = items.map(asMemory).find((m) => m.id === id);
-      if (!found) {
-        if (json) {
-          printJson({ ok: false, error: "not_found" });
-        } else {
-          printError(`Memory ${id} not found.`);
+      let raw: unknown;
+      try {
+        raw = await ctx.client.get(id);
+      } catch (err: unknown) {
+        const status = (err as { status?: number })?.status;
+        if (status === 404) {
+          if (json) printJson({ ok: false, error: "not_found" });
+          else printError(`Memory ${id} not found.`);
+          process.exit(1);
         }
-        process.exit(1);
+        throw err;
       }
+      const found = asMemory(raw);
       if (json) {
         printJson(found);
         return;
@@ -108,7 +110,12 @@ export function registerMemoryCommands(program: Command): void {
     .action(async (id: string, opts: { yes?: boolean }, cmd: Command) => {
       const json = rootJsonFlag(cmd);
       const ctx = await getClient();
-      if (!opts.yes && !json) {
+      if (!opts.yes) {
+        if (!process.stdin.isTTY) {
+          if (json) printJson({ ok: false, error: "confirmation_required" });
+          else printError("Refusing to delete without --yes in a non-interactive shell.");
+          process.exit(2);
+        }
         const { confirm } = await prompts({
           type: "confirm",
           name: "confirm",

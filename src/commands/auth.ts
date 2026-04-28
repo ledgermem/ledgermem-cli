@@ -1,12 +1,19 @@
 import { Command } from "commander";
 import prompts from "prompts";
+import { LedgerMem } from "@ledgermem/memory";
 import {
   clearConfig,
   readConfig,
   resolveApiUrl,
   writeConfig,
 } from "../lib/config.js";
-import { printJson, printSuccess, printInfo, rootJsonFlag } from "../lib/output.js";
+import {
+  printError,
+  printJson,
+  printSuccess,
+  printInfo,
+  rootJsonFlag,
+} from "../lib/output.js";
 
 export function registerAuthCommands(program: Command): void {
   program
@@ -51,6 +58,24 @@ export function registerAuthCommands(program: Command): void {
       const apiKey = opts.apiKey ?? (responses.apiKey as string);
       const workspaceId = opts.workspaceId ?? (responses.workspaceId as string);
       const apiUrl = opts.apiUrl ?? (responses.apiUrl as string) ?? defaultApiUrl;
+
+      // Verify credentials before persisting — a typo should fail loudly,
+      // not silently overwrite a previously-working config.
+      try {
+        const probe = new LedgerMem({ apiKey, workspaceId, apiUrl });
+        await probe.list({ limit: 1 });
+      } catch (err: unknown) {
+        const status = (err as { status?: number })?.status;
+        const message =
+          err instanceof Error ? err.message : "credential verification failed";
+        if (json) {
+          printJson({ ok: false, error: "verification_failed", status, message });
+        } else {
+          printError(`Could not verify credentials${status ? ` (HTTP ${status})` : ""}: ${message}`);
+          printInfo("Existing config left untouched.");
+        }
+        process.exit(1);
+      }
 
       await writeConfig({ apiKey, workspaceId, apiUrl });
 

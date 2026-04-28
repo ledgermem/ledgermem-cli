@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import kleur from "kleur";
+import { pathToFileURL } from "node:url";
 import { registerAuthCommands } from "./commands/auth.js";
 import { registerMemoryCommands } from "./commands/memory.js";
 import { registerWorkspaceCommands } from "./commands/workspace.js";
@@ -52,10 +53,16 @@ async function main(): Promise<void> {
   }
 }
 
-const isMain = import.meta.url === `file://${process.argv[1]}` ||
-  process.argv[1]?.endsWith("cli.js") ||
-  process.argv[1]?.endsWith("cli.ts");
+function isMainModule(): boolean {
+  const argv1 = process.argv[1];
+  if (!argv1) return false;
+  try {
+    return import.meta.url === pathToFileURL(argv1).href;
+  } catch {
+    return false;
+  }
+}
 
-if (isMain) {
+if (isMainModule()) {
   void main();
 }
