@@ -10,6 +10,25 @@ import { registerDoctorCommand } from "./commands/doctor.js";
 
 const VERSION = "0.1.0";
 
+// Color detection: kleur's autodetect can produce ANSI escapes when this CLI
+// is spawned as a subprocess (e.g. by `claude`, CI runners, or scripts that
+// pipe stdout) because it only checks isTTY on first import. Honor the
+// no-color.org NO_COLOR convention and disable color whenever stdout is
+// not a TTY, unless FORCE_COLOR is explicitly set.
+function configureColor(): void {
+  const force = process.env.FORCE_COLOR;
+  if (force && force !== "0" && force !== "false") {
+    kleur.enabled = true;
+    return;
+  }
+  if (process.env.NO_COLOR !== undefined) {
+    kleur.enabled = false;
+    return;
+  }
+  kleur.enabled = Boolean(process.stdout.isTTY);
+}
+configureColor();
+
 export function buildCli(): Command {
   const program = new Command();
 
