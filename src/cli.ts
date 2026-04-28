@@ -15,10 +15,20 @@ const VERSION = "0.1.0";
 // pipe stdout) because it only checks isTTY on first import. Honor the
 // no-color.org NO_COLOR convention and disable color whenever stdout is
 // not a TTY, unless FORCE_COLOR is explicitly set.
+//
+// Precedence (matches supports-color spec):
+//   1. FORCE_COLOR=0|false  → explicitly disabled, wins over NO_COLOR.
+//   2. FORCE_COLOR=<other>  → explicitly enabled, wins over NO_COLOR.
+//   3. NO_COLOR set (any value, including empty) → disabled.
+//   4. Fallback: stdout.isTTY.
+//
+// Previous version checked `force && force !== "0"`, which let
+// `FORCE_COLOR=0` fall through to the NO_COLOR/TTY branches and ended up
+// *enabling* color in a TTY when the operator had explicitly disabled it.
 function configureColor(): void {
   const force = process.env.FORCE_COLOR;
-  if (force && force !== "0" && force !== "false") {
-    kleur.enabled = true;
+  if (force !== undefined) {
+    kleur.enabled = force !== "0" && force !== "false" && force !== "";
     return;
   }
   if (process.env.NO_COLOR !== undefined) {
@@ -60,13 +70,21 @@ export function buildCli(): Command {
 
 async function main(): Promise<void> {
   const program = buildCli();
+  // Detect --json early so the top-level error handler can match the format
+  // the user requested. Without this, `ledgermem search foo --json` that
+  // throws (e.g. network failure) writes ANSI-coloured human text to stderr
+  // and exits 1, while `ledgermem get $missing --json` writes JSON and exits
+  // 1 — same exit code, two different output shapes. Scripts piping to `jq`
+  // can't tell which they got.
+  const wantsJson = process.argv.includes("--json");
   try {
     await program.parseAsync(process.argv);
   } catch (err) {
-    if (err instanceof Error) {
-      process.stderr.write(kleur.red(`error: ${err.message}\n`));
+    const message = err instanceof Error ? err.message : String(err);
+    if (wantsJson) {
+      process.stderr.write(JSON.stringify({ ok: false, error: message }) + "\n");
     } else {
-      process.stderr.write(kleur.red(`error: ${String(err)}\n`));
+      process.stderr.write(kleur.red(`error: ${message}\n`));
     }
     process.exit(1);
   }
