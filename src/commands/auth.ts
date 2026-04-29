@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import prompts from "prompts";
-import { LedgerMem } from "@ledgermem/memory";
+import { Mnemo } from "@getmnemo/memory";
 import {
   clearConfig,
   readConfig,
@@ -18,7 +18,7 @@ import {
 export function registerAuthCommands(program: Command): void {
   program
     .command("login")
-    .description("authenticate with LedgerMem and save credentials locally")
+    .description("authenticate with Mnemo and save credentials locally")
     .option("--api-key <key>", "API key (skips interactive prompt)")
     .option("--workspace-id <id>", "workspace id (skips interactive prompt)")
     .option("--api-url <url>", "override API base URL")
@@ -32,7 +32,7 @@ export function registerAuthCommands(program: Command): void {
           {
             type: opts.apiKey ? null : "password",
             name: "apiKey",
-            message: "LedgerMem API key",
+            message: "Mnemo API key",
             validate: (val: string) => (val.trim().length > 0 ? true : "API key is required"),
           },
           {
@@ -62,7 +62,7 @@ export function registerAuthCommands(program: Command): void {
       // Verify credentials before persisting — a typo should fail loudly,
       // not silently overwrite a previously-working config.
       try {
-        const probe = new LedgerMem({ apiKey, workspaceId, apiUrl });
+        const probe = new Mnemo({ apiKey, workspaceId, apiUrl });
         await probe.list({ limit: 1 });
       } catch (err: unknown) {
         const status = (err as { status?: number })?.status;
@@ -105,8 +105,8 @@ export function registerAuthCommands(program: Command): void {
     .action(async (_opts: unknown, cmd: Command) => {
       const json = rootJsonFlag(cmd);
       const cfg = await readConfig();
-      const apiKey = process.env.LEDGERMEM_API_KEY ?? cfg.apiKey;
-      const workspaceId = process.env.LEDGERMEM_WORKSPACE_ID ?? cfg.workspaceId;
+      const apiKey = process.env.GETMNEMO_API_KEY ?? cfg.apiKey;
+      const workspaceId = process.env.GETMNEMO_WORKSPACE_ID ?? cfg.workspaceId;
       const apiUrl = resolveApiUrl(cfg);
 
       const payload = {
@@ -121,7 +121,7 @@ export function registerAuthCommands(program: Command): void {
         return;
       }
       if (!payload.authenticated) {
-        printInfo("Not logged in. Run `ledgermem login`.");
+        printInfo("Not logged in. Run `getmnemo login`.");
         return;
       }
       printInfo(`Workspace: ${payload.workspaceId}`);

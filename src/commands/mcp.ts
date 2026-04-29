@@ -10,19 +10,19 @@ export function registerMcpCommand(program: Command): void {
     .action(async (opts: { client?: string }, cmd: Command) => {
       const json = rootJsonFlag(cmd);
       const cfg = await readConfig();
-      const apiKey = resolveApiKey(cfg) ?? "<your-ledgermem-api-key>";
+      const apiKey = resolveApiKey(cfg) ?? "<your-getmnemo-api-key>";
       const workspaceId = resolveWorkspaceId(cfg) ?? "<your-workspace-id>";
       const apiUrl = resolveApiUrl(cfg);
 
       const snippet = {
         mcpServers: {
-          ledgermem: {
+          getmnemo: {
             command: "npx",
-            args: ["-y", "@ledgermem/mcp"],
+            args: ["-y", "@getmnemo/mcp"],
             env: {
-              LEDGERMEM_API_KEY: apiKey,
-              LEDGERMEM_WORKSPACE_ID: workspaceId,
-              LEDGERMEM_API_URL: apiUrl,
+              GETMNEMO_API_KEY: apiKey,
+              GETMNEMO_WORKSPACE_ID: workspaceId,
+              GETMNEMO_API_URL: apiUrl,
             },
           },
         },

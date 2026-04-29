@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { buildCli } from "./cli.js";
 
-describe("LedgerMem CLI", () => {
+describe("Mnemo CLI", () => {
   let stdout: string;
   let stderr: string;
   let writeStdout: typeof process.stdout.write;
@@ -32,11 +32,11 @@ describe("LedgerMem CLI", () => {
     const program = buildCli();
     program.exitOverride();
     try {
-      await program.parseAsync(["node", "ledgermem", "--help"]);
+      await program.parseAsync(["node", "getmnemo", "--help"]);
     } catch {
       // commander throws on help by design
     }
-    expect(stdout).toMatch(/Usage: ledgermem/);
+    expect(stdout).toMatch(/Usage: getmnemo/);
     expect(stdout).toMatch(/login/);
     expect(stdout).toMatch(/logout/);
     expect(stdout).toMatch(/whoami/);
@@ -61,7 +61,7 @@ describe("LedgerMem CLI", () => {
     const program = buildCli();
     program.exitOverride();
     try {
-      await program.parseAsync(["node", "ledgermem", "--json", "doctor"]);
+      await program.parseAsync(["node", "getmnemo", "--json", "doctor"]);
     } catch (err) {
       expect((err as Error).message).toBe("__exit__");
     }
@@ -79,7 +79,7 @@ describe("LedgerMem CLI", () => {
       throw err;
     });
     try {
-      await program.parseAsync(["node", "ledgermem", "totally-not-a-command"]);
+      await program.parseAsync(["node", "getmnemo", "totally-not-a-command"]);
     } catch {
       // expected
     }

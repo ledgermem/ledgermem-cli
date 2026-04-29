@@ -1,4 +1,4 @@
-import { LedgerMem } from "@ledgermem/memory";
+import { Mnemo } from "@getmnemo/memory";
 import {
   readConfig,
   resolveApiKey,
@@ -7,7 +7,7 @@ import {
 } from "./config.js";
 
 export interface ClientContext {
-  client: LedgerMem;
+  client: Mnemo;
   apiKey: string;
   workspaceId: string;
   apiUrl: string;
@@ -28,16 +28,16 @@ export async function getClient(): Promise<ClientContext> {
 
   if (!apiKey) {
     throw new ClientAuthError(
-      "Not authenticated. Run `ledgermem login` or set LEDGERMEM_API_KEY.",
+      "Not authenticated. Run `getmnemo login` or set GETMNEMO_API_KEY.",
     );
   }
   if (!workspaceId) {
     throw new ClientAuthError(
-      "No workspace selected. Run `ledgermem login` or set LEDGERMEM_WORKSPACE_ID.",
+      "No workspace selected. Run `getmnemo login` or set GETMNEMO_WORKSPACE_ID.",
     );
   }
 
-  const client = new LedgerMem({ apiKey, workspaceId, apiUrl });
+  const client = new Mnemo({ apiKey, workspaceId, apiUrl });
   return { client, apiKey, workspaceId, apiUrl };
 }
 

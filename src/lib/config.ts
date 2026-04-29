@@ -10,9 +10,9 @@ export interface CliConfig {
   updatedAt?: string;
 }
 
-const CONFIG_DIR_NAME = ".ledgermem";
+const CONFIG_DIR_NAME = ".getmnemo";
 const CONFIG_FILE_NAME = "config.json";
-const DEFAULT_API_URL = "https://api.proofly.dev";
+const DEFAULT_API_URL = "https://api.getmnemo.xyz";
 
 export function configDir(): string {
   return join(homedir(), CONFIG_DIR_NAME);
@@ -58,13 +58,13 @@ export async function clearConfig(): Promise<void> {
 }
 
 export function resolveApiKey(cfg: CliConfig): string | undefined {
-  return process.env.LEDGERMEM_API_KEY ?? cfg.apiKey;
+  return process.env.GETMNEMO_API_KEY ?? cfg.apiKey;
 }
 
 export function resolveWorkspaceId(cfg: CliConfig): string | undefined {
-  return process.env.LEDGERMEM_WORKSPACE_ID ?? cfg.workspaceId;
+  return process.env.GETMNEMO_WORKSPACE_ID ?? cfg.workspaceId;
 }
 
 export function resolveApiUrl(cfg: CliConfig): string {
-  return process.env.LEDGERMEM_API_URL ?? cfg.apiUrl ?? DEFAULT_API_URL;
+  return process.env.GETMNEMO_API_URL ?? cfg.apiUrl ?? DEFAULT_API_URL;
 }

@@ -43,8 +43,8 @@ export function buildCli(): Command {
   const program = new Command();
 
   program
-    .name("ledgermem")
-    .description(kleur.cyan("LedgerMem CLI") + " — manage memories from your terminal.")
+    .name("getmnemo")
+    .description(kleur.cyan("Mnemo CLI") + " — manage memories from your terminal.")
     .version(VERSION, "-v, --version", "print the CLI version")
     .option("--json", "format output as JSON for machine consumption", false)
     .showHelpAfterError("(add --help for additional information)");
@@ -71,9 +71,9 @@ export function buildCli(): Command {
 async function main(): Promise<void> {
   const program = buildCli();
   // Detect --json early so the top-level error handler can match the format
-  // the user requested. Without this, `ledgermem search foo --json` that
+  // the user requested. Without this, `getmnemo search foo --json` that
   // throws (e.g. network failure) writes ANSI-coloured human text to stderr
-  // and exits 1, while `ledgermem get $missing --json` writes JSON and exits
+  // and exits 1, while `getmnemo get $missing --json` writes JSON and exits
   // 1 — same exit code, two different output shapes. Scripts piping to `jq`
   // can't tell which they got.
   const wantsJson = process.argv.includes("--json");

@@ -17,7 +17,7 @@ export function registerWorkspaceCommands(program: Command): void {
         return;
       }
       if (workspaces.length === 0) {
-        printInfo("No workspaces configured. Run `ledgermem login`.");
+        printInfo("No workspaces configured. Run `getmnemo login`.");
         return;
       }
       for (const w of workspaces) {
