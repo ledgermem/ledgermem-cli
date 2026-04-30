@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import prompts from "prompts";
-import { Mnemo } from "@getmnemo/memory";
+import { Mnemo } from "@mnemo/memory";
 import {
   clearConfig,
   readConfig,

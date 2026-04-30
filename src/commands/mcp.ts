@@ -18,7 +18,7 @@ export function registerMcpCommand(program: Command): void {
         mcpServers: {
           getmnemo: {
             command: "npx",
-            args: ["-y", "@getmnemo/mcp"],
+            args: ["-y", "@mnemo/mcp"],
             env: {
               GETMNEMO_API_KEY: apiKey,
               GETMNEMO_WORKSPACE_ID: workspaceId,
