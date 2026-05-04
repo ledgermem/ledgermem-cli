@@ -1,5 +1,5 @@
 {
-  "name": "@mnemo/cli",
+  "name": "getmnemo-cli",
   "version": "0.1.0",
   "description": "Official CLI for Mnemo — manage memories, workspaces, and integrations from your terminal.",
   "type": "module",
@@ -21,7 +21,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@mnemo/memory": "^0.1.0",
+    "getmnemo": "^0.1.0",
     "commander": "^12.1.0",
     "kleur": "^4.1.5",
     "prompts": "^2.4.2"
@@ -47,9 +47,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getmnemo/getmnemo-cli.git"
+    "url": "https://github.com/ledgermem/getmnemo-cli.git"
   },
-  "homepage": "https://github.com/getmnemo/getmnemo-cli#readme",
+  "homepage": "https://getmnemo.xyz",
   "bugs": {
     "url": "https://github.com/getmnemo/getmnemo-cli/issues"
   }

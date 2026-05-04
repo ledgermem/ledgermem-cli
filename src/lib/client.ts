@@ -1,4 +1,4 @@
-import { Mnemo } from "@mnemo/memory";
+import { Mnemo } from "getmnemo";
 import {
   readConfig,
   resolveApiKey,
@@ -10,7 +10,7 @@ export interface ClientContext {
   client: Mnemo;
   apiKey: string;
   workspaceId: string;
-  apiUrl: string;
+  baseUrl: string;
 }
 
 export class ClientAuthError extends Error {
@@ -24,7 +24,7 @@ export async function getClient(): Promise<ClientContext> {
   const cfg = await readConfig();
   const apiKey = resolveApiKey(cfg);
   const workspaceId = resolveWorkspaceId(cfg);
-  const apiUrl = resolveApiUrl(cfg);
+  const baseUrl = resolveApiUrl(cfg);
 
   if (!apiKey) {
     throw new ClientAuthError(
@@ -37,8 +37,8 @@ export async function getClient(): Promise<ClientContext> {
     );
   }
 
-  const client = new Mnemo({ apiKey, workspaceId, apiUrl });
-  return { client, apiKey, workspaceId, apiUrl };
+  const client = new Mnemo({ apiKey, workspaceId, baseUrl });
+  return { client, apiKey, workspaceId, baseUrl };
 }
 
 export function parseMetadata(pairs: string[] | undefined): Record<string, string> {

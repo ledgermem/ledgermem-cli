@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 export interface CliConfig {
   apiKey?: string;
   workspaceId?: string;
-  apiUrl?: string;
+  baseUrl?: string;
   workspaces?: Array<{ id: string; name?: string }>;
   updatedAt?: string;
 }
@@ -66,5 +66,5 @@ export function resolveWorkspaceId(cfg: CliConfig): string | undefined {
 }
 
 export function resolveApiUrl(cfg: CliConfig): string {
-  return process.env.GETMNEMO_API_URL ?? cfg.apiUrl ?? DEFAULT_API_URL;
+  return process.env.GETMNEMO_API_URL ?? cfg.baseUrl ?? DEFAULT_API_URL;
 }

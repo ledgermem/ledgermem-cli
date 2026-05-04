@@ -34,7 +34,7 @@ export function registerMemoryCommands(program: Command): void {
       const json = rootJsonFlag(cmd);
       const ctx = await getClient();
       const metadata = parseMetadata(opts.metadata);
-      const result = await ctx.client.add(content, { metadata });
+      const result = await ctx.client.add({ content, metadata });
       if (json) {
         printJson(result);
         return;
@@ -55,7 +55,7 @@ export function registerMemoryCommands(program: Command): void {
         printError("--limit must be a positive integer");
         process.exit(2);
       }
-      const result = await ctx.client.search(query, { limit });
+      const result = await ctx.client.search({ query, limit });
       if (json) {
         printJson(result);
         return;

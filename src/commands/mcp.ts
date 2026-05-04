@@ -12,7 +12,7 @@ export function registerMcpCommand(program: Command): void {
       const cfg = await readConfig();
       const apiKey = resolveApiKey(cfg) ?? "<your-getmnemo-api-key>";
       const workspaceId = resolveWorkspaceId(cfg) ?? "<your-workspace-id>";
-      const apiUrl = resolveApiUrl(cfg);
+      const baseUrl = resolveApiUrl(cfg);
 
       const snippet = {
         mcpServers: {
@@ -22,7 +22,7 @@ export function registerMcpCommand(program: Command): void {
             env: {
               GETMNEMO_API_KEY: apiKey,
               GETMNEMO_WORKSPACE_ID: workspaceId,
-              GETMNEMO_API_URL: apiUrl,
+              GETMNEMO_API_URL: baseUrl,
             },
           },
         },

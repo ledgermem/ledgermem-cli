@@ -18,7 +18,7 @@ export function registerDoctorCommand(program: Command): void {
       const cfg = await readConfig();
       const apiKey = resolveApiKey(cfg);
       const workspaceId = resolveWorkspaceId(cfg);
-      const apiUrl = resolveApiUrl(cfg);
+      const baseUrl = resolveApiUrl(cfg);
       const checks: CheckResult[] = [];
 
       checks.push({ name: "config file present", ok: Boolean(cfg.updatedAt), detail: cfg.updatedAt });
@@ -29,9 +29,9 @@ export function registerDoctorCommand(program: Command): void {
       let healthDetail = "";
       let healthUrl: URL | null = null;
       try {
-        healthUrl = new URL("/healthz", apiUrl);
+        healthUrl = new URL("/healthz", baseUrl);
       } catch {
-        healthDetail = `Invalid API URL: "${apiUrl}". Did you forget the scheme (e.g. https://)?`;
+        healthDetail = `Invalid API URL: "${baseUrl}". Did you forget the scheme (e.g. https://)?`;
       }
       if (healthUrl) {
         try {
@@ -45,12 +45,12 @@ export function registerDoctorCommand(program: Command): void {
           healthDetail = err instanceof Error ? err.message : String(err);
         }
       }
-      checks.push({ name: `API reachable (${apiUrl}/healthz)`, ok: healthOk, detail: healthDetail });
+      checks.push({ name: `API reachable (${baseUrl}/healthz)`, ok: healthOk, detail: healthDetail });
 
       const allOk = checks.every((c) => c.ok);
 
       if (json) {
-        printJson({ ok: allOk, apiUrl, workspaceId: workspaceId ?? null, checks });
+        printJson({ ok: allOk, baseUrl, workspaceId: workspaceId ?? null, checks });
         process.exit(allOk ? 0 : 1);
       }
 
