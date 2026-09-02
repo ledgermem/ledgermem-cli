@@ -1,4 +1,5 @@
 import { Mnemo } from "getmnemo";
+import { PersonalApi } from "./personal-api.js";
 import {
   readConfig,
   resolveApiKey,
@@ -10,6 +11,8 @@ import {
 
 export interface ClientContext {
   client: Mnemo;
+  /** Transport for people/reminders/brief/timeline/meetings/merge. */
+  api: PersonalApi;
   apiKey: string;
   workspaceId: string;
   baseUrl: string;
@@ -51,7 +54,8 @@ export async function getClient(): Promise<ClientContext> {
     baseUrl,
     defaultContainerTag: resolveContainerTag(cfg),
   });
-  return { client, apiKey, workspaceId, baseUrl, cfg };
+  const api = new PersonalApi({ apiKey, baseUrl });
+  return { client, api, apiKey, workspaceId, baseUrl, cfg };
 }
 
 export function parseMetadata(pairs: string[] | undefined): Record<string, string> {

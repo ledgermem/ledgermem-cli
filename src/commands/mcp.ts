@@ -18,7 +18,9 @@ export function registerMcpCommand(program: Command): void {
         mcpServers: {
           getmnemo: {
             command: "npx",
-            args: ["-y", "@mnemo/mcp"],
+            // Published package is `getmnemo-mcp` (bin `getmnemo-mcp`); the old
+            // `@mnemo/mcp` name was never published.
+            args: ["-y", "getmnemo-mcp"],
             env: {
               GETMNEMO_API_KEY: apiKey,
               GETMNEMO_WORKSPACE_ID: workspaceId,

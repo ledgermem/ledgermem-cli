@@ -51,6 +51,52 @@ describe("Mnemo CLI", () => {
     expect(stdout).toMatch(/workspace/);
     expect(stdout).toMatch(/mcp/);
     expect(stdout).toMatch(/doctor/);
+    expect(stdout).toMatch(/brief/);
+    expect(stdout).toMatch(/timeline/);
+    expect(stdout).toMatch(/people/);
+    expect(stdout).toMatch(/reminders/);
+    expect(stdout).toMatch(/meetings/);
+    expect(stdout).toMatch(/memories/);
+  });
+
+  it("--version prints the package.json version", async () => {
+    const program = buildCli();
+    program.exitOverride();
+    try {
+      await program.parseAsync(["node", "getmnemo", "--version"]);
+    } catch {
+      // commander throws on version by design
+    }
+    expect(stdout.trim()).toBe("0.3.0");
+  });
+
+  it("exits 2 for an unknown option on a subcommand (exit callback is inherited)", async () => {
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+      throw new Error("__exit__");
+    }) as never);
+    const program = buildCli();
+    await expect(program.parseAsync(["node", "getmnemo", "people", "list", "--bogus"])).rejects.toThrow("__exit__");
+    expect(exitSpy).toHaveBeenCalledWith(2);
+    expect(stderr).toMatch(/unknown option '--bogus'/);
+  });
+
+  it("lists subcommands in group help", async () => {
+    for (const [group, subs] of [
+      ["people", ["list", "get", "add"]],
+      ["reminders", ["list", "upcoming", "add", "complete"]],
+      ["meetings", ["upcoming", "brief"]],
+      ["memories", ["merge"]],
+    ] as const) {
+      stdout = "";
+      const program = buildCli();
+      program.exitOverride();
+      try {
+        await program.parseAsync(["node", "getmnemo", group, "--help"]);
+      } catch {
+        // commander throws on help by design
+      }
+      for (const sub of subs) expect(stdout).toMatch(new RegExp(`^\\s+${sub}\\b`, "m"));
+    }
   });
 
   it("doctor reports failure when API is unreachable (mocked)", async () => {

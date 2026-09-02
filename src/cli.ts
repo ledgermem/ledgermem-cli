@@ -7,8 +7,14 @@ import { registerMemoryCommands } from "./commands/memory.js";
 import { registerWorkspaceCommands } from "./commands/workspace.js";
 import { registerMcpCommand } from "./commands/mcp.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
-
-const VERSION = "0.2.0";
+import { registerBriefCommand } from "./commands/brief.js";
+import { registerTimelineCommand } from "./commands/timeline.js";
+import { registerPeopleCommands } from "./commands/people.js";
+import { registerRemindersCommands } from "./commands/reminders.js";
+import { registerMeetingsCommands } from "./commands/meetings.js";
+import { registerMemoriesCommands } from "./commands/memories.js";
+import { PersonalApiError } from "./lib/personal-api.js";
+import { CLI_VERSION } from "./lib/version.js";
 
 // Color detection: kleur's autodetect can produce ANSI escapes when this CLI
 // is spawned as a subprocess (e.g. by `claude`, CI runners, or scripts that
@@ -39,31 +45,53 @@ function configureColor(): void {
 }
 configureColor();
 
+/** Commander error codes that mean "bad invocation" → exit 2. */
+const USAGE_ERROR_CODES = new Set([
+  "commander.unknownCommand",
+  "commander.unknownOption",
+  "commander.missingArgument",
+  "commander.missingMandatoryOptionValue",
+  "commander.optionMissingArgument",
+  "commander.excessArguments",
+  "commander.invalidArgument",
+  "commander.conflictingOption",
+]);
+
 export function buildCli(): Command {
   const program = new Command();
 
   program
     .name("getmnemo")
     .description(kleur.cyan("Mnemo CLI") + " — manage memories from your terminal.")
-    .version(VERSION, "-v, --version", "print the CLI version")
+    .version(CLI_VERSION, "-v, --version", "print the CLI version")
     .option("--json", "format output as JSON for machine consumption", false)
     .showHelpAfterError("(add --help for additional information)");
+
+  // Installed BEFORE the subcommands are registered: commander copies the
+  // exit callback into each `.command()` at creation time, so a late
+  // override only covers the root and `getmnemo people list --bogus` would
+  // exit 1 instead of the documented 2.
+  program.exitOverride((err) => {
+    if (err.code === "commander.helpDisplayed" || err.code === "commander.version" || err.code === "commander.help") {
+      process.exit(0);
+    }
+    if (USAGE_ERROR_CODES.has(err.code)) {
+      process.exit(2);
+    }
+    process.exit(err.exitCode ?? 1);
+  });
 
   registerAuthCommands(program);
   registerMemoryCommands(program);
   registerWorkspaceCommands(program);
   registerMcpCommand(program);
   registerDoctorCommand(program);
-
-  program.exitOverride((err) => {
-    if (err.code === "commander.helpDisplayed" || err.code === "commander.version") {
-      process.exit(0);
-    }
-    if (err.code === "commander.unknownCommand" || err.code === "commander.unknownOption") {
-      process.exit(2);
-    }
-    process.exit(err.exitCode ?? 1);
-  });
+  registerBriefCommand(program);
+  registerTimelineCommand(program);
+  registerPeopleCommands(program);
+  registerRemindersCommands(program);
+  registerMeetingsCommands(program);
+  registerMemoriesCommands(program);
 
   return program;
 }
@@ -82,7 +110,13 @@ async function main(): Promise<void> {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (wantsJson) {
-      process.stderr.write(JSON.stringify({ ok: false, error: message }) + "\n");
+      // API errors carry the stable `code` from the API envelope (e.g.
+      // FEATURE_DISABLED, PERSON_NOT_FOUND) so scripts can branch on it.
+      const detail =
+        err instanceof PersonalApiError
+          ? { ok: false, error: message, code: err.code, status: err.status }
+          : { ok: false, error: message };
+      process.stderr.write(JSON.stringify(detail) + "\n");
     } else {
       process.stderr.write(kleur.red(`error: ${message}\n`));
     }
