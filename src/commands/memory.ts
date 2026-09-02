@@ -3,7 +3,11 @@ import kleur from "kleur";
 import prompts from "prompts";
 import type { Memory, SearchHit } from "getmnemo";
 import { getClient, parseMetadata } from "../lib/client.js";
-import { resolveContainerTag, type CliConfig } from "../lib/config.js";
+import {
+  CONTAINER_OPTION_DESC,
+  CONTAINER_OPTION_FLAGS,
+  requireContainerTag,
+} from "../lib/container.js";
 import {
   printError,
   printInfo,
@@ -17,28 +21,6 @@ import {
 // hits carry `memoryId`; full Memory objects (add/get/update/list) carry `id`.
 function memoryId(m: Memory | SearchHit): string {
   return "memoryId" in m ? m.memoryId : m.id;
-}
-
-const CONTAINER_OPTION_FLAGS = "-C, --container <tag>";
-const CONTAINER_OPTION_DESC =
-  "container tag / tenant boundary (e.g. user:jane); falls back to GETMNEMO_CONTAINER or config";
-
-// Every memory command needs a container as of getmnemo 0.5.1: the API 400s
-// by-id get/delete without a scope (requireMemoryScope guard), and the SDK
-// itself throws on add/search/list. Resolve or exit(2) before any request.
-function requireContainerTag(cfg: CliConfig, flag: string | undefined, json: boolean): string {
-  const containerTag = resolveContainerTag(cfg, flag);
-  if (!containerTag) {
-    if (json) {
-      printJson({ ok: false, error: "container_required" });
-    } else {
-      printError(
-        "A container is required. Pass --container <tag>, set GETMNEMO_CONTAINER, or add defaultContainerTag to your config.",
-      );
-    }
-    process.exit(2);
-  }
-  return containerTag;
 }
 
 export function registerMemoryCommands(program: Command): void {

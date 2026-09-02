@@ -7,6 +7,13 @@ import { registerMemoryCommands } from "./commands/memory.js";
 import { registerWorkspaceCommands } from "./commands/workspace.js";
 import { registerMcpCommand } from "./commands/mcp.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
+import { registerBriefCommand } from "./commands/brief.js";
+import { registerTimelineCommand } from "./commands/timeline.js";
+import { registerPeopleCommands } from "./commands/people.js";
+import { registerRemindersCommands } from "./commands/reminders.js";
+import { registerMeetingsCommands } from "./commands/meetings.js";
+import { registerMemoriesCommands } from "./commands/memories.js";
+import { PersonalApiError } from "./lib/personal-api.js";
 import { CLI_VERSION } from "./lib/version.js";
 
 // Color detection: kleur's autodetect can produce ANSI escapes when this CLI
@@ -53,6 +60,12 @@ export function buildCli(): Command {
   registerWorkspaceCommands(program);
   registerMcpCommand(program);
   registerDoctorCommand(program);
+  registerBriefCommand(program);
+  registerTimelineCommand(program);
+  registerPeopleCommands(program);
+  registerRemindersCommands(program);
+  registerMeetingsCommands(program);
+  registerMemoriesCommands(program);
 
   program.exitOverride((err) => {
     if (err.code === "commander.helpDisplayed" || err.code === "commander.version") {
@@ -81,7 +94,13 @@ async function main(): Promise<void> {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     if (wantsJson) {
-      process.stderr.write(JSON.stringify({ ok: false, error: message }) + "\n");
+      // API errors carry the stable `code` from the API envelope (e.g.
+      // FEATURE_DISABLED, PERSON_NOT_FOUND) so scripts can branch on it.
+      const detail =
+        err instanceof PersonalApiError
+          ? { ok: false, error: message, code: err.code, status: err.status }
+          : { ok: false, error: message };
+      process.stderr.write(JSON.stringify(detail) + "\n");
     } else {
       process.stderr.write(kleur.red(`error: ${message}\n`));
     }
