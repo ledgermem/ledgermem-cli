@@ -2,11 +2,26 @@ import { CLI_VERSION } from "./version.js";
 
 /**
  * Thin typed REST transport for the personal-memory surfaces (people,
- * reminders, brief, timeline, meetings, merge). The `getmnemo` SDK does not
- * expose these resources yet, so — like the MCP server — the CLI owns its
- * own client for them. Same auth plane as the SDK: `Authorization: Bearer`.
- * Every call is container/tenant-scoped by the caller (query or body); this
- * layer never invents a fallback container.
+ * reminders, brief, timeline, meetings, merge). The published `getmnemo` SDK
+ * (0.5.1) does not expose these resources yet, so — like the MCP server — the
+ * CLI owns its own client for them. Same auth plane as the SDK:
+ * `Authorization: Bearer`. Every call is container/tenant-scoped by the
+ * caller (query or body); this layer never invents a fallback container.
+ *
+ * Wire shapes are identical to getmnemo 0.6.0's `src/personal/*` resources,
+ * so the swap is mechanical once 0.6.0 is on npm:
+ *   api.get('/v1/people', q)                → client.people.list(q)
+ *   api.get('/v1/people/{slug}')            → client.people.get(slug)
+ *   api.post('/v1/people', body)            → client.people.create(body)
+ *   api.get('/v1/reminders', q)             → client.reminders.list(q)
+ *   api.get('/v1/reminders/upcoming', q)    → client.reminders.upcoming(q)
+ *   api.post('/v1/reminders', body)         → client.reminders.create(body)
+ *   api.post('/v1/reminders/{id}/complete') → client.reminders.complete(id)
+ *   api.get('/v1/brief', q)                 → client.brief.get(q)
+ *   api.get('/v1/timeline', q)              → client.timeline.get(q)
+ *   api.get('/v1/meetings/upcoming', q)     → client.meetings.upcoming(q)
+ *   api.get('/v1/meetings/{id}/brief', q)   → client.meetings.brief(id, q)
+ *   api.post('/v1/memories/merge', body)    → client.memories.merge(body)
  */
 
 export type QueryValue = string | number | boolean | undefined;

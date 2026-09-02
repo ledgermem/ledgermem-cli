@@ -19,11 +19,11 @@ import {
   systemTimezone,
 } from "../lib/output.js";
 import type {
-  CreateReminderBody,
+  CreateReminderInput,
   ImportantDate,
-  ListRemindersResponse,
+  PaginatedReminders,
   Reminder,
-  UpcomingRemindersResponse,
+  UpcomingReminders,
 } from "../lib/personal-types.js";
 
 const STATUSES = ["open", "completed", "all"] as const;
@@ -98,7 +98,7 @@ export function registerRemindersCommands(program: Command): void {
       const dueAfter = opts.dueAfter === undefined ? undefined : requireIsoDate(opts.dueAfter, "--due-after", json);
       const dueBefore = opts.dueBefore === undefined ? undefined : requireIsoDate(opts.dueBefore, "--due-before", json);
       const ctx = await getClient();
-      const result = await ctx.api.get<ListRemindersResponse>("/v1/reminders", {
+      const result = await ctx.api.get<PaginatedReminders>("/v1/reminders", {
         status,
         days,
         dueAfter,
@@ -127,7 +127,7 @@ export function registerRemindersCommands(program: Command): void {
       const days = parseIntFlag(opts.days, "--days", json, { min: 1, max: 90, fallback: 7 });
       const limit = parseIntFlag(opts.limit, "--limit", json, { min: 1, max: 100, fallback: 50 });
       const ctx = await getClient();
-      const result = await ctx.api.get<UpcomingRemindersResponse>("/v1/reminders/upcoming", {
+      const result = await ctx.api.get<UpcomingReminders>("/v1/reminders/upcoming", {
         days,
         timezone: opts.timezone ?? systemTimezone(),
         containerTag: opts.container,
@@ -167,7 +167,7 @@ export function registerRemindersCommands(program: Command): void {
           "A target is required. Pass --person <slug>, --container <tag>, set GETMNEMO_CONTAINER, or add defaultContainerTag to your config.",
         );
       }
-      const body: CreateReminderBody = {
+      const body: CreateReminderInput = {
         content,
         dueAt,
         personSlug: opts.person,

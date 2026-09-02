@@ -14,9 +14,9 @@ import {
   truncate,
 } from "../lib/output.js";
 import type {
-  CreatePersonBody,
-  ImportantDateInput,
-  ListPeopleResponse,
+  CreatePersonInput,
+  PersonImportantDate,
+  PaginatedPeople,
   Person,
 } from "../lib/personal-types.js";
 
@@ -40,8 +40,8 @@ interface AddOpts {
 
 const IMPORTANT_DATE_RE = /^(\d{4}-\d{2}-\d{2})(?::(recurring))?$/;
 
-/** `label=YYYY-MM-DD[:recurring]` → ImportantDateInput, or exit 2. */
-export function parseImportantDates(raw: string[] | undefined, json: boolean): ImportantDateInput[] | undefined {
+/** `label=YYYY-MM-DD[:recurring]` → PersonImportantDate, or exit 2. */
+export function parseImportantDates(raw: string[] | undefined, json: boolean): PersonImportantDate[] | undefined {
   if (!raw || raw.length === 0) return undefined;
   return raw.map((entry) => {
     const idx = entry.indexOf("=");
@@ -90,7 +90,7 @@ export function registerPeopleCommands(program: Command): void {
       const json = rootJsonFlag(cmd);
       const limit = parseIntFlag(opts.limit, "--limit", json, { min: 1, max: 100, fallback: 50 });
       const ctx = await getClient();
-      const result = await ctx.api.get<ListPeopleResponse>("/v1/people", {
+      const result = await ctx.api.get<PaginatedPeople>("/v1/people", {
         limit,
         cursor: opts.cursor,
         q: opts.q,
@@ -139,7 +139,7 @@ export function registerPeopleCommands(program: Command): void {
       const name = displayName.trim();
       if (!name) return failUsage(json, "invalid_argument", "displayName must not be empty");
       const importantDates = parseImportantDates(opts.importantDate, json);
-      const body: CreatePersonBody = {
+      const body: CreatePersonInput = {
         displayName: name,
         slug: opts.slug,
         relationship: opts.relationship,

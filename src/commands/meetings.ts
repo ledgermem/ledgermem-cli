@@ -12,7 +12,7 @@ import {
   printLine,
   rootJsonFlag,
 } from "../lib/output.js";
-import type { ListUpcomingMeetingsResponse, Meeting, MeetingBrief } from "../lib/personal-types.js";
+import type { UpcomingMeetings, Meeting, MeetingBrief } from "../lib/personal-types.js";
 import { reminderLine } from "./reminders.js";
 
 interface UpcomingOpts {
@@ -73,7 +73,7 @@ export function registerMeetingsCommands(program: Command): void {
       const days = parseIntFlag(opts.days, "--days", json, { min: 1, max: 30, fallback: 7 });
       const limit = parseIntFlag(opts.limit, "--limit", json, { min: 1, max: 100, fallback: 50 });
       const ctx = await getClient();
-      const result = await ctx.api.get<ListUpcomingMeetingsResponse>("/v1/meetings/upcoming", {
+      const result = await ctx.api.get<UpcomingMeetings>("/v1/meetings/upcoming", {
         days,
         limit,
         cursor: opts.cursor,

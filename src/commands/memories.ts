@@ -4,7 +4,7 @@ import prompts from "prompts";
 import { getClient, parseMetadata } from "../lib/client.js";
 import { CONTAINER_OPTION_DESC, CONTAINER_OPTION_FLAGS, requireContainerTag } from "../lib/container.js";
 import { failUsage, printInfo, printJson, printSuccess, rootJsonFlag } from "../lib/output.js";
-import type { MergeMemoriesBody, MergeMemoriesResponse } from "../lib/personal-types.js";
+import type { MergeMemoriesInput, MergeMemoriesResponse } from "../lib/personal-types.js";
 
 const MIN_MERGE_IDS = 2;
 const MAX_MERGE_IDS = 20;
@@ -66,7 +66,7 @@ export function registerMemoriesCommands(program: Command): void {
         });
         if (!confirm) return printInfo("Cancelled.");
       }
-      const body: MergeMemoriesBody = {
+      const body: MergeMemoriesInput = {
         containerTag,
         ids,
         into: opts.into,

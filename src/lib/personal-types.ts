@@ -1,8 +1,10 @@
 /**
  * Response/request shapes for the personal-memory endpoints, mirrored from
  * the API's public OpenAPI (api/src/public-api/dto/{people,reminders,brief,
- * timeline,meetings,memories}.dto.ts). Only the fields the CLI renders or
- * sends are typed; `--json` passes the raw payload through untouched.
+ * timeline,meetings,memories}.dto.ts). Names match the `getmnemo` SDK's
+ * `src/personal/types.ts` (0.6.0) so the CLI can switch to the SDK resources
+ * once that release is on npm. Only the fields the CLI renders or sends are
+ * typed; `--json` passes the raw payload through untouched.
  */
 
 export type ProvenanceKind = "api_key" | "mcp" | "user" | "connector" | "inbound" | "system";
@@ -25,13 +27,13 @@ export interface MemoryRecord {
   container?: { tag?: string } | null;
 }
 
-export interface ImportantDateInput {
+export interface PersonImportantDate {
   label: string;
   date: string;
   recurring: boolean;
 }
 
-export interface CreatePersonBody {
+export interface CreatePersonInput {
   displayName: string;
   slug?: string;
   relationship?: string;
@@ -39,7 +41,7 @@ export interface CreatePersonBody {
   phone?: string;
   company?: string;
   notes?: string;
-  importantDates?: ImportantDateInput[];
+  importantDates?: PersonImportantDate[];
   aliases?: string[];
 }
 
@@ -53,7 +55,7 @@ export interface Person {
   phone: string | null;
   company: string | null;
   notes: string | null;
-  importantDates: ImportantDateInput[];
+  importantDates: PersonImportantDate[];
   aliases: string[];
   archivedAt: string | null;
   memoryCount: number;
@@ -63,7 +65,7 @@ export interface Person {
   updatedAt: string;
 }
 
-export interface ListPeopleResponse {
+export interface PaginatedPeople {
   items: Person[];
   nextCursor: string | null;
   total: number;
@@ -74,7 +76,7 @@ export interface Reminder extends MemoryRecord {
   person: { slug: string; displayName: string } | null;
 }
 
-export interface CreateReminderBody {
+export interface CreateReminderInput {
   content: string;
   dueAt: string;
   personSlug?: string;
@@ -83,7 +85,7 @@ export interface CreateReminderBody {
   metadata?: Record<string, string>;
 }
 
-export interface ListRemindersResponse {
+export interface PaginatedReminders {
   items: Reminder[];
   nextCursor: string | null;
   total: number;
@@ -98,7 +100,7 @@ export interface ImportantDate {
   recurring: boolean;
 }
 
-export interface UpcomingRemindersResponse {
+export interface UpcomingReminders {
   overdue: Reminder[];
   dueToday: Reminder[];
   upcoming: Reminder[];
@@ -107,7 +109,7 @@ export interface UpcomingRemindersResponse {
   timezone: string;
 }
 
-export interface Citation {
+export interface AnswerCitation {
   type: string;
   score: number;
   content: string;
@@ -116,9 +118,9 @@ export interface Citation {
   url?: string;
 }
 
-export interface AnswerBlock {
+export interface BriefFollowUps {
   answer: string;
-  citations: Citation[];
+  citations: AnswerCitation[];
   abstained: boolean;
   cached: boolean;
 }
@@ -155,14 +157,14 @@ export interface MeetingConnection {
   lastSyncAt: string | null;
 }
 
-export interface ListUpcomingMeetingsResponse {
+export interface UpcomingMeetings {
   items: Meeting[];
   nextCursor: string | null;
   connections: MeetingConnection[];
 }
 
 export interface MeetingBrief extends Meeting {
-  brief: AnswerBlock | null;
+  brief: BriefFollowUps | null;
   people: Array<{
     slug: string;
     displayName: string;
@@ -183,7 +185,7 @@ export interface DailyBrief {
   importantDates: ImportantDate[] | null;
   recentMemories: MemoryRecord[] | null;
   counts: { memoriesLast24h: number; documentsLast24h: number } | null;
-  followUps: AnswerBlock | null;
+  followUps: BriefFollowUps | null;
   meetings: Meeting[] | null;
 }
 
@@ -202,14 +204,14 @@ export interface TimelineItem {
   meta: Record<string, unknown>;
 }
 
-export interface TimelineResponse {
+export interface Timeline {
   items: TimelineItem[];
   nextCursor: string | null;
   container: { tag: string; containerType: string; displayName: string | null } | null;
   range: { from: string | null; to: string | null };
 }
 
-export interface MergeMemoriesBody {
+export interface MergeMemoriesInput {
   containerTag: string;
   ids: string[];
   into?: string;

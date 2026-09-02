@@ -14,7 +14,7 @@ import {
   requireOneOf,
   rootJsonFlag,
 } from "../lib/output.js";
-import { TIMELINE_ITEM_TYPES, type TimelineItem, type TimelineResponse } from "../lib/personal-types.js";
+import { TIMELINE_ITEM_TYPES, type TimelineItem, type Timeline } from "../lib/personal-types.js";
 
 const DIRECTIONS = ["desc", "asc"] as const;
 
@@ -73,7 +73,7 @@ export function registerTimelineCommand(program: Command): void {
       const types = parseTypes(opts.types, json);
       const ctx = await getClient();
       const containerTag = requireContainerTag(ctx.cfg, opts.container, json);
-      const result = await ctx.api.get<TimelineResponse>("/v1/timeline", {
+      const result = await ctx.api.get<Timeline>("/v1/timeline", {
         containerTag,
         from,
         to,
