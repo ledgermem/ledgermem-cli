@@ -45,6 +45,18 @@ function configureColor(): void {
 }
 configureColor();
 
+/** Commander error codes that mean "bad invocation" → exit 2. */
+const USAGE_ERROR_CODES = new Set([
+  "commander.unknownCommand",
+  "commander.unknownOption",
+  "commander.missingArgument",
+  "commander.missingMandatoryOptionValue",
+  "commander.optionMissingArgument",
+  "commander.excessArguments",
+  "commander.invalidArgument",
+  "commander.conflictingOption",
+]);
+
 export function buildCli(): Command {
   const program = new Command();
 
@@ -54,6 +66,20 @@ export function buildCli(): Command {
     .version(CLI_VERSION, "-v, --version", "print the CLI version")
     .option("--json", "format output as JSON for machine consumption", false)
     .showHelpAfterError("(add --help for additional information)");
+
+  // Installed BEFORE the subcommands are registered: commander copies the
+  // exit callback into each `.command()` at creation time, so a late
+  // override only covers the root and `getmnemo people list --bogus` would
+  // exit 1 instead of the documented 2.
+  program.exitOverride((err) => {
+    if (err.code === "commander.helpDisplayed" || err.code === "commander.version" || err.code === "commander.help") {
+      process.exit(0);
+    }
+    if (USAGE_ERROR_CODES.has(err.code)) {
+      process.exit(2);
+    }
+    process.exit(err.exitCode ?? 1);
+  });
 
   registerAuthCommands(program);
   registerMemoryCommands(program);
@@ -66,16 +92,6 @@ export function buildCli(): Command {
   registerRemindersCommands(program);
   registerMeetingsCommands(program);
   registerMemoriesCommands(program);
-
-  program.exitOverride((err) => {
-    if (err.code === "commander.helpDisplayed" || err.code === "commander.version") {
-      process.exit(0);
-    }
-    if (err.code === "commander.unknownCommand" || err.code === "commander.unknownOption") {
-      process.exit(2);
-    }
-    process.exit(err.exitCode ?? 1);
-  });
 
   return program;
 }

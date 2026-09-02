@@ -48,13 +48,19 @@ export function truncate(text: string, max = 80): string {
   return text.slice(0, max - 1) + "…";
 }
 
-/** `2026-09-03T10:00:00.000Z` → `2026-09-03 10:00Z`; null-safe. */
+/**
+ * `2026-09-03T10:00:00.000Z` → `2026-09-03 10:00Z`,
+ * `2026-09-03T10:00:00+05:00` → `2026-09-03 10:00+05:00`, `2026-09-03` → as is;
+ * null-safe. The zone is kept verbatim so a local-offset start is never
+ * mislabelled as UTC.
+ */
 export function formatWhen(iso: string | null | undefined): string {
   if (!iso) return "—";
-  const match = /^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}))?/.exec(iso);
+  const match = /^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/.exec(iso);
   if (!match) return iso;
-  const [, day, time] = match;
-  return time ? `${day} ${time}Z` : (day ?? iso);
+  const [, day, time, zone] = match;
+  if (!time) return day ?? iso;
+  return `${day} ${time}${zone ?? ""}`;
 }
 
 /** Single-line first sentence of a memory/snippet. */

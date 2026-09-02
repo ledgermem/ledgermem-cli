@@ -148,7 +148,7 @@ describe("getmnemo reminders", () => {
 
     it("fails when --due is missing (commander mandatory option)", async () => {
       const fetchMock = mockFetch();
-      await runExpectingExit(["reminders", "add", "x", "--person", "jane"], 1);
+      await runExpectingExit(["reminders", "add", "x", "--person", "jane"], 2);
       expect(out.stderr()).toMatch(/required option '--due <iso>' not specified/);
       expect(fetchMock).not.toHaveBeenCalled();
     });
