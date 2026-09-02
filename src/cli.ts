@@ -7,8 +7,7 @@ import { registerMemoryCommands } from "./commands/memory.js";
 import { registerWorkspaceCommands } from "./commands/workspace.js";
 import { registerMcpCommand } from "./commands/mcp.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
-
-const VERSION = "0.2.0";
+import { CLI_VERSION } from "./lib/version.js";
 
 // Color detection: kleur's autodetect can produce ANSI escapes when this CLI
 // is spawned as a subprocess (e.g. by `claude`, CI runners, or scripts that
@@ -45,7 +44,7 @@ export function buildCli(): Command {
   program
     .name("getmnemo")
     .description(kleur.cyan("Mnemo CLI") + " — manage memories from your terminal.")
-    .version(VERSION, "-v, --version", "print the CLI version")
+    .version(CLI_VERSION, "-v, --version", "print the CLI version")
     .option("--json", "format output as JSON for machine consumption", false)
     .showHelpAfterError("(add --help for additional information)");
 
