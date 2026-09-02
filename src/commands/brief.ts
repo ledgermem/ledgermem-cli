@@ -62,7 +62,7 @@ function printBrief(brief: DailyBrief, days: number): void {
     }
   }
   if (brief.followUps) {
-    printed += 1;
+    if (!brief.followUps.abstained) printed += 1;
     printHeading("Follow-ups & promises");
     printLine(brief.followUps.abstained ? kleur.dim("  Nothing outstanding that I can find.") : `  ${brief.followUps.answer}`);
   }

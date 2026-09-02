@@ -74,10 +74,25 @@ describe("getmnemo brief", () => {
     expect(out.stderr()).toMatch(/--sections must be a comma-separated subset/);
   });
 
-  it("renders the abstained follow-ups copy and an empty brief", async () => {
-    mockFetch(jsonResponse({ ...BRIEF, reminders: { overdue: [], dueToday: [], upcoming: [] }, recentMemories: [], meetings: null, counts: null, followUps: { answer: "", citations: [], abstained: true, cached: false } }));
+  it("renders the abstained follow-ups copy and the empty-state fallback for a fully empty brief", async () => {
+    mockFetch(jsonResponse({ ...BRIEF, reminders: { overdue: [], dueToday: [], upcoming: [] }, importantDates: [], recentMemories: [], meetings: null, counts: null, followUps: { answer: "", citations: [], abstained: true, cached: false } }));
     await run(["brief", "--container", "user:me"]);
     expect(out.stdout()).toMatch(/Nothing outstanding that I can find/);
+    expect(out.stderr() + out.stdout()).toMatch(/Nothing to report today/);
+  });
+
+  it("renders the empty-state fallback when every section is null", async () => {
+    mockFetch(jsonResponse({ ...BRIEF, reminders: null, importantDates: null, recentMemories: null, meetings: null, counts: null, followUps: null }));
+    await run(["brief", "--container", "user:me"]);
+    expect(out.stderr() + out.stdout()).toMatch(/Nothing to report today/);
+    expect(out.stdout()).not.toMatch(/Follow-ups & promises/);
+  });
+
+  it("does not print the empty-state fallback when follow-ups has an answer", async () => {
+    mockFetch(jsonResponse({ ...BRIEF, reminders: { overdue: [], dueToday: [], upcoming: [] }, importantDates: [], recentMemories: [], meetings: null, counts: null }));
+    await run(["brief", "--container", "user:me"]);
+    expect(out.stdout()).toMatch(/You promised Bob a draft by Friday/);
+    expect(out.stderr() + out.stdout()).not.toMatch(/Nothing to report today/);
   });
 
   it("surfaces FEATURE_DISABLED (503) as a coded error", async () => {
